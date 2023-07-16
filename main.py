@@ -146,20 +146,26 @@ while True:
 
 prefix = input("Prefix: ")
 
-bot = commands.Bot(command_prefix=prefix, self_bot=True)
+bot = commands.Bot(command_prefix=prefix, self_bot=True, case_insensitive=True)
 bot.remove_command("help")
 
 
 
 @bot.event
 async def on_ready():
-    print(f"Welcome, {bot.user.name}"
+    print(f"Welcome, {Fore.LIGHTRED_EX}{bot.user.name}{Fore.RESET}"
           "\nInfo:"
           f"\n  Username: {bot.user.name}"
           f"\n  Display Name: {bot.user.display_name}"
           f"\n  ID: {bot.user.id}"
           f"\n  Discriminator: {bot.user.discriminator}")
 
+@bot.command(name="prefix")
+async def prefixChange(ctx, prefix2Set:str):
+    if prefix2Set is not None:
+        global prefix
+        prefix = prefix2Set
+        await ctx.reply(f"Prefix Has Been Changed To: `{prefix2Set}`")
 
 @bot.command()
 async def help(ctx):
@@ -346,13 +352,13 @@ async def prepareServer(guild: discord.Guild):
         for channel in guild.channels:
             await channel.delete()
             print(f"{Fore.LIGHTBLUE_EX}[Prepering Server]{Fore.RESET} Deleted Channel: {channel.name}")
-            await asyncio.sleep(.7)
+            await asyncio.sleep(.75)
         for role in guild.roles:
             try:
                 if role.name != "@everyone":
                     await role.delete()
                     print(f"{Fore.LIGHTBLUE_EX}[Prepering Server]{Fore.RESET} Deleted Role: {role.name}")
-                    await asyncio.sleep(.75)
+                    await asyncio.sleep(.8)
             except discord.Forbidden:
                 print(f"{Fore.RED}[Error]{Fore.RESET} Insufficient permissions to delete the role: {role.name}")
             except discord.HTTPException:
@@ -360,11 +366,11 @@ async def prepareServer(guild: discord.Guild):
         for emoji in guild.emojis:
             await emoji.delete()
             print(f"{Fore.LIGHTBLUE_EX}[Prepering Server]{Fore.RESET} Deleted Emoji: {emoji.name}")
-            await asyncio.sleep(.75)
+            await asyncio.sleep(.8)
         for sticker in guild.stickers:
             await sticker.delete()
             print(f"{Fore.LIGHTBLUE_EX}[Prepering Server]{Fore.RESET} Deleted Sticker: {sticker.name}")
-            await asyncio.sleep(.75)
+            await asyncio.sleep(.8)
     except discord.RateLimited as e:
         print(f"{Fore.RED}[Error]{Fore.RESET} {e}")
         return
@@ -413,7 +419,7 @@ async def cloneRoles(oldGuild: discord.Guild, newGuild: discord.Guild):
             else:
                 mappings["roles"][role] = discord.utils.get(newGuild.roles, name="@everyone")
         for role in reversed(roles_create):
-            print(f"{Fore.LIGHTBLUE_EX}[Role Cloning]{Fore.RESET} Creating Role: {role}")
+
             new_role = await newGuild.create_role(name=role.name, colour=role.colour, hoist=role.hoist,
                                                   mentionable=role.mentionable, permissions=role.permissions)
             mappings["roles"][role] = new_role
@@ -435,13 +441,12 @@ async def cloneCategories(oldGuild: discord.Guild, newGuild: discord.Guild, perm
                 for role, permissions in category.overwrites.items():
                     if isinstance(role, discord.Role):
                         overwrites[mappings["roles"][role]] = permissions
-            print(f"{Fore.LIGHTBLUE_EX}[Category Cloning]{Fore.RESET} Creating Category: {role}")
             new_category = await newGuild.create_category(name=category.name, position=category.position,
                                                           overwrites=overwrites)
             mappings["categories"][category] = new_category
             print(
                 f"{Fore.LIGHTBLUE_EX}[Category Cloning]{Fore.RESET} Category Created: {str(new_category.id)} | {new_category.name}")
-            await asyncio.sleep(.75)
+            await asyncio.sleep(.7)
     except discord.RateLimited as e:
         print(f"{Fore.RED}[Error]{Fore.RESET} {e}")
         await asyncio.sleep(e.retry_after)
@@ -459,7 +464,6 @@ async def cloneChannels(oldGuild: discord.Guild, newGuild: discord.Guild, perms:
                     if isinstance(role, discord.Role):
                         overwrites[mappings["roles"][role]] = permissions
             if isinstance(channel, discord.TextChannel):
-                print(f"{Fore.LIGHTBLUE_EX}[Channel Cloning]{Fore.RESET} Creating Channel: {channel}")
                 new_channel = await newGuild.create_text_channel(name=channel.name,
                                                                  position=channel.position,
                                                                  topic=channel.topic,
@@ -473,7 +477,6 @@ async def cloneChannels(oldGuild: discord.Guild, newGuild: discord.Guild, perms:
 
             elif isinstance(channel, discord.VoiceChannel):
                 bitrate = channel.bitrate if channel.bitrate <= 96000 else None
-                print(f"{Fore.LIGHTBLUE_EX}[Channel Cloning]{Fore.RESET} Creating Voice Channel: {channel}")
                 new_channel = await newGuild.create_voice_channel(name=channel.name,
                                                                   position=channel.position,
                                                                   bitrate=bitrate,
@@ -482,7 +485,7 @@ async def cloneChannels(oldGuild: discord.Guild, newGuild: discord.Guild, perms:
                                                                   overwrites=overwrites)
                 print(
                     f"{Fore.LIGHTBLUE_EX}[Channel Cloning]{Fore.RESET} Voice Channel Created: {str(new_channel.id)} | {new_channel.name}")
-            await asyncio.sleep(.75)
+            await asyncio.sleep(.7)
     except discord.RateLimited as e:
         print(f"{Fore.RED}[Error]{Fore.RESET} {e}")
         await asyncio.sleep(e.retry_after)
@@ -500,10 +503,14 @@ async def cloneEmojis(oldGuild: discord.Guild, newGuild: discord.Guild):
 
         emojis_to_clone = min(available_slots, len(oldGuild.emojis))
         for emoji in oldGuild.emojis[:emojis_to_clone]:
-            print(f"{Fore.LIGHTBLUE_EX}[Emoji Cloning]{Fore.RESET} Creating Emoji: {str(emoji.id)} | {emoji.name}")
-            await newGuild.create_custom_emoji(name=emoji.name, image=await emoji.read())
-            print(f"{Fore.LIGHTBLUE_EX}[Emoji Cloning]{Fore.RESET} Created Emoji:")
-            await asyncio.sleep(.75)
+            try:
+                print(f"{Fore.LIGHTBLUE_EX}[Emoji Cloning]{Fore.RESET} Creating Emoji: {str(emoji.id)} | {emoji.name}")
+                await newGuild.create_custom_emoji(name=emoji.name, image=await emoji.read())
+                print(f"{Fore.LIGHTBLUE_EX}[Emoji Cloning]{Fore.RESET} Created Emoji")
+                await asyncio.sleep(.7)
+            except discord.HTTPException:
+                print(print(f"{Fore.RED}[Error]{Fore.RESET} Unable To Resize Emoji"))
+
     except discord.RateLimited as e:
         print(f"{Fore.RED}[Error]{Fore.RESET} {e}")
         await asyncio.sleep(e.retry_after)
@@ -511,25 +518,8 @@ async def cloneEmojis(oldGuild: discord.Guild, newGuild: discord.Guild):
         return
 
 
-async def cloneStickers(oldGuild: discord.Guild, newGuild: discord.Guild):
-    try:
-        max_emojis = newGuild.emoji_limit
-        available_slots = max_emojis - len(newGuild.emojis)
-        if available_slots <= 0:
-            print(f"{Fore.LIGHTRED_EX}[Sticker Cloning]{Fore.RESET} Cannot Create More Stickers.")
-            return
 
-        emojis_to_clone = min(available_slots, len(oldGuild.emojis))
-        for emoji in oldGuild.emojis[:emojis_to_clone]:
-            print(f"{Fore.LIGHTBLUE_EX}[Sticker Cloning]{Fore.RESET} Creating Emoji: {str(emoji.id)} | {emoji.name}")
-            await newGuild.create_custom_emoji(name=emoji.name, image=await emoji.read())
-            print(f"{Fore.LIGHTBLUE_EX}[Sticker Cloning]{Fore.RESET} Created Emoji:")
-            await asyncio.sleep(.75)
-    except discord.RateLimited as e:
-        print(f"{Fore.RED}[Error]{Fore.RESET} {e}")
-        await asyncio.sleep(e.retry_after)
-        await cloneStickers(oldGuild, newGuild)
-        return
+
 
 
 @bot.command()
@@ -550,9 +540,8 @@ async def clone(ctx: commands.Context, OldID: int, newGuildID: int):
     await cloneChannels(oldGuild, newGuild, True)
     await msg.edit(content="Cloning Emojis...")
     await cloneEmojis(oldGuild, newGuild)
-    await msg.edit(content="Cloning Stickers...")
-    await cloneStickers(oldGuild, newGuild)
     await msg.edit(content=f"Server Cloned! It Took {round((time.time() - start_time), 2)} Seconds.")
+    print(f"{Fore.LIGHTBLUE_EX}[Log]{Fore.RESET} Server Cloning Complete")
 
 
 bot.run(token)
