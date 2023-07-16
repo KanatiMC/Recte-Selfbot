@@ -31,15 +31,19 @@ except ModuleNotFoundError:
 try:
     import string
 except ModuleNotFoundError:
-    os.system("pip install ")
+    os.system("pip install string")
 try:
     import math
 except ModuleNotFoundError:
-    os.system("pip install ")
+    os.system("pip install math")
 try:
     import shutil
 except ModuleNotFoundError:
-    os.system("pip install ")
+    os.system("pip install shutil")
+try:
+    from colorama import Fore
+except ModuleNotFoundError:
+    os.system("pip install colorama")
 from os import system
 system("title " + "Recte Selfbot By Kanati")
 
@@ -311,119 +315,186 @@ async def status(ctx, mode, *, name):
 
 
 async def prepareServer(guild: discord.Guild):
-    if guild is None:
-        return
+    try:
+        if guild is None:
+            return
 
-    for channel in guild.channels:
-        await channel.delete()
-        print(f"Deleted Channel: {channel.name}")
-        await asyncio.sleep(.5)
-    for role in guild.roles:
-        try:
-            if role.name != "@everyone":
-                await role.delete()
-                print(f"Deleted Role: {role.name}")
-                await asyncio.sleep(.75)
-        except discord.Forbidden:
-            print(f"Insufficient permissions to delete the role: {role.name}")
-        except discord.HTTPException:
-            print(f"Invalid Role: {role.name}")
+        for channel in guild.channels:
+            await channel.delete()
+            print(f"{Fore.LIGHTBLUE_EX}[Prepering Server]{Fore.RESET} Deleted Channel: {channel.name}")
+            await asyncio.sleep(.6)
+        for role in guild.roles:
+            try:
+                if role.name != "@everyone":
+                    await role.delete()
+                    print(f"{Fore.LIGHTBLUE_EX}[Prepering Server]{Fore.RESET} Deleted Role: {role.name}")
+                    await asyncio.sleep(.65)
+            except discord.Forbidden:
+                print(f"{Fore.RED}[Error]{Fore.RESET} Insufficient permissions to delete the role: {role.name}")
+            except discord.HTTPException:
+                print(f"{Fore.RED}[Error]{Fore.RESET} Invalid Role: {role.name}")
+        for emoji in guild.emojis:
+            await emoji.delete()
+            print(f"{Fore.LIGHTBLUE_EX}[Prepering Server]{Fore.RESET} Deleted Emoji: {emoji.name}")
+            await asyncio.sleep(.65)
+        for sticker in guild.stickers:
+            await sticker.delete()
+            print(f"{Fore.LIGHTBLUE_EX}[Prepering Server]{Fore.RESET} Deleted Sticker: {sticker.name}")
+            await asyncio.sleep(.65)
+    except discord.RateLimited as e:
+        print(f"{Fore.RED}[Error]{Fore.RESET} {e}")
+        return
 
 
 
 async def cloneInfo(old_guild: discord.Guild, new_guild: discord.Guild):
-    if old_guild.icon is not None:
-        icon_data = await old_guild.icon.read()
-        await new_guild.edit(icon=icon_data)
-    if old_guild.icon is None:
-        await new_guild.edit(icon=None)
-    if old_guild.banner is not None:
-        banner_data = await old_guild.banner.read()
-        await new_guild.edit(banner=banner_data)
-    if old_guild.banner is None:
-        await new_guild.edit(banner=None)
-    if old_guild.name is not None:
-        await new_guild.edit(name=old_guild.name)
-    if old_guild.afk_channel is not None:
-        await new_guild.edit(afk_channel=old_guild.afk_channel)
-    if old_guild.afk_timeout is not None:
-        await new_guild.edit(afk_timeout=old_guild.afk_timeout)
-    await asyncio.sleep(.5)
+    try:
+        if old_guild.icon is not None:
+            print(f"{Fore.LIGHTBLUE_EX}[Info Cloning]{Fore.RESET} Cloning Icon")
+            icon_data = await old_guild.icon.read()
+            await new_guild.edit(icon=icon_data)
+            print(f"{Fore.LIGHTBLUE_EX}[Info Cloning]{Fore.RESET} Icon Cloned")
+        if old_guild.icon is None:
+            print(f"{Fore.LIGHTBLUE_EX}[Info Cloning]{Fore.RESET} No Icon Detected, Removing Icon...")
+            await new_guild.edit(icon=None)
+            print(f"{Fore.LIGHTBLUE_EX}[Info Cloning]{Fore.RESET} Icon Removed")
+        if new_guild.premium_tier >= 2:
+            if old_guild.banner is not None:
+                print(f"{Fore.LIGHTBLUE_EX}[Info Cloning]{Fore.RESET} Cloning Banner")
+                banner_data = await old_guild.banner.read()
+                await new_guild.edit(banner=banner_data)
+                print(f"{Fore.LIGHTBLUE_EX}[Info Cloning]{Fore.RESET} Banner Cloned")
+            if old_guild.banner is None:
+                print(f"{Fore.LIGHTBLUE_EX}[Info Cloning]{Fore.RESET} No Banner Detected, Removing Banner...")
+                await new_guild.edit(banner=None)
+                print(f"{Fore.LIGHTBLUE_EX}[Info Cloning]{Fore.RESET} Banner Removed")
+        if old_guild.name is not None:
+            await new_guild.edit(name=old_guild.name)
+            print(f"{Fore.LIGHTBLUE_EX}[Info Cloning]{Fore.RESET} Guild Name Changed")
+        await asyncio.sleep(.5)
+    except discord.RateLimited as e:
+        print(f"{Fore.RED}[Error]{Fore.RESET} {e}")
+        return
 
 
 
 
 async def clone_roles(oldGuild: discord.Guild, newGuild: discord.Guild):
-    roles_create = []
-    role: discord.Role
-    for role in oldGuild.roles:
-        if role.name != "@everyone":
-            roles_create.append(role)
-        else:
-            mappings["roles"][role] = discord.utils.get(newGuild.roles, name="@everyone")
-    for role in reversed(roles_create):
-        new_role = await newGuild.create_role(name=role.name, colour=role.colour, hoist=role.hoist,
-                                              mentionable=role.mentionable, permissions=role.permissions)
-        mappings["roles"][role] = new_role
-        print("Created role: " + str(new_role.id) + " | " + new_role.name)
-        await asyncio.sleep(.5)
+    try:
+        roles_create = []
+        role: discord.Role
+        for role in oldGuild.roles:
+            if role.name != "@everyone":
+                print(f"{Fore.LIGHTBLUE_EX}[Role Cloning]{Fore.RESET} Saving Permissions For {role}")
+                roles_create.append(role)
+                print(f"{Fore.LIGHTBLUE_EX}[Role Cloning]{Fore.RESET} Permissions Saved")
+            else:
+                print(f"{Fore.LIGHTBLUE_EX}[Role Cloning]{Fore.RESET} Saving Permissions For {role}")
+                mappings["roles"][role] = discord.utils.get(newGuild.roles, name="@everyone")
+                print(f"{Fore.LIGHTBLUE_EX}[Role Cloning]{Fore.RESET} Permissions Saved")
+        for role in reversed(roles_create):
+            print(f"{Fore.LIGHTBLUE_EX}[Role Cloning]{Fore.RESET} Creating Role: {role}")
+            new_role = await newGuild.create_role(name=role.name, colour=role.colour, hoist=role.hoist,
+                                                  mentionable=role.mentionable, permissions=role.permissions)
+            mappings["roles"][role] = new_role
+            print(f"{Fore.LIGHTBLUE_EX}[Role Cloning]{Fore.RESET} Role Created: " + str(new_role.id) + " | " + new_role.name)
+            await asyncio.sleep(.65)
+    except discord.RateLimited as e:
+        print(f"{Fore.RED}[Error]{Fore.RESET} {e}")
+        return
 
 
 async def clone_categories(oldGuild: discord.Guild, newGuild: discord.Guild, perms: bool = True):
-    for category in oldGuild.categories:
-        overwrites: dict = {}
-        if perms:
-            for role, permissions in category.overwrites.items():
-                if isinstance(role, discord.Role):
-                    overwrites[mappings["roles"][role]] = permissions
-        new_category = await newGuild.create_category(name=category.name, position=category.position,
-                                                      overwrites=overwrites)
-        mappings["categories"][category] = new_category
-        print("Created category: " + str(new_category.id) + " | " + new_category.name)
-        await asyncio.sleep(.5)
+    try:
+        for category in oldGuild.categories:
+            overwrites: dict = {}
+            if perms:
+                for role, permissions in category.overwrites.items():
+                    if isinstance(role, discord.Role):
+                        overwrites[mappings["roles"][role]] = permissions
+            print(f"{Fore.LIGHTBLUE_EX}[Category Cloning]{Fore.RESET} Creating Category: {role}")
+            new_category = await newGuild.create_category(name=category.name, position=category.position,
+                                                          overwrites=overwrites)
+            mappings["categories"][category] = new_category
+            print(f"{Fore.LIGHTBLUE_EX}[Category Cloning]{Fore.RESET} Category Created: {str(new_category.id)} | {new_category.name}")
+            await asyncio.sleep(.65)
+    except discord.RateLimited as e:
+        print(f"{Fore.RED}[Error]{Fore.RESET} {e}")
+        return
 
 
 async def clone_channels(oldGuild: discord.Guild, newGuild: discord.Guild, perms: bool = True):
-    for channel in oldGuild.channels:
-        category = mappings.get("categories", {}).get(channel.category, None)
-        overwrites: dict = {}
-        if perms:
-            for role, permissions in channel.overwrites.items():
-                if isinstance(role, discord.Role):
-                    overwrites[mappings["roles"][role]] = permissions
-        if isinstance(channel, discord.TextChannel):
-            new_channel = await newGuild.create_text_channel(name=channel.name,
-                                                             position=channel.position,
-                                                             topic=channel.topic,
-                                                             slowmode_delay=channel.slowmode_delay,
-                                                             nsfw=channel.nsfw,
-                                                             category=category,
-                                                             overwrites=overwrites)
-            mappings["channels"][channel] = new_channel
-            print("Created text channel " + str(channel.id) + " | " + new_channel.name)
-        elif isinstance(channel, discord.VoiceChannel):
-            bitrate = channel.bitrate if channel.bitrate <= 96000 else None
-            new_channel = await newGuild.create_voice_channel(name=channel.name,
-                                                              position=channel.position,
-                                                              bitrate=bitrate,
-                                                              user_limit=channel.user_limit,
-                                                              category=category,
-                                                              overwrites=overwrites)
-            print("Created voice channel " + str(channel.id) + " | " + new_channel.name)
-        await asyncio.sleep(.5)
+    try:
+        for channel in oldGuild.channels:
+            category = mappings.get("categories", {}).get(channel.category, None)
+            overwrites: dict = {}
+            if perms:
+                for role, permissions in channel.overwrites.items():
+                    if isinstance(role, discord.Role):
+                        overwrites[mappings["roles"][role]] = permissions
+            if isinstance(channel, discord.TextChannel):
+                print(f"{Fore.LIGHTBLUE_EX}[Channel Cloning]{Fore.RESET} Creating Channel: {channel}")
+                new_channel = await newGuild.create_text_channel(name=channel.name,
+                                                                 position=channel.position,
+                                                                 topic=channel.topic,
+                                                                 slowmode_delay=channel.slowmode_delay,
+                                                                 nsfw=channel.nsfw,
+                                                                 category=category,
+                                                                 overwrites=overwrites)
+                mappings["channels"][channel] = new_channel
+                print(f"{Fore.LIGHTBLUE_EX}[Channel Cloning]{Fore.RESET} Channel Created: {str(new_channel.id)} | {new_channel.name}")
+
+            elif isinstance(channel, discord.VoiceChannel):
+                bitrate = channel.bitrate if channel.bitrate <= 96000 else None
+                print(f"{Fore.LIGHTBLUE_EX}[Channel Cloning]{Fore.RESET} Creating Voice Channel: {channel}")
+                new_channel = await newGuild.create_voice_channel(name=channel.name,
+                                                                  position=channel.position,
+                                                                  bitrate=bitrate,
+                                                                  user_limit=channel.user_limit,
+                                                                  category=category,
+                                                                  overwrites=overwrites)
+                print(f"{Fore.LIGHTBLUE_EX}[Channel Cloning]{Fore.RESET} Voice Channel Created: {str(new_channel.id)} | {new_channel.name}")
+            await asyncio.sleep(.65)
+    except discord.RateLimited as e:
+        print(f"{Fore.RED}[Error]{Fore.RESET} {e}")
+        return
 
 
 async def clone_emojis(oldGuild: discord.Guild, newGuild: discord.Guild):
-    for emoji in oldGuild.emojis:
-        print("Created emoji: " + str(emoji.id) + " | " + emoji.name)
-        await newGuild.create_custom_emoji(name=emoji.name, image=await emoji.read())
-        await asyncio.sleep(.5)
+    try:
+        max_emojis = newGuild.emoji_limit
+        available_slots = max_emojis - len(newGuild.emojis)
+        if available_slots <= 0:
+            print(f"{Fore.LIGHTRED_EX}[Emoji Cloning]{Fore.RESET} Cannot Create More Emojis")
+            return
+
+        emojis_to_clone = min(available_slots, len(oldGuild.emojis))
+        for emoji in oldGuild.emojis[:emojis_to_clone]:
+            print(f"{Fore.LIGHTBLUE_EX}[Emoji Cloning]{Fore.RESET} Creating Emoji: {str(emoji.id)} | {emoji.name}")
+            await newGuild.create_custom_emoji(name=emoji.name, image=await emoji.read())
+            print(f"{Fore.LIGHTBLUE_EX}[Emoji Cloning]{Fore.RESET} Created Emoji:")
+            await asyncio.sleep(.65)
+    except discord.RateLimited as e:
+        print(f"{Fore.RED}[Error]{Fore.RESET} {e}")
+        return
 
 async def cloneStickers(oldGuild: discord.Guild, newGuild: discord.Guild):
-    for sticker in oldGuild.stickers:
-        print("Created Sticker: "+str(sticker.id) + " | " + sticker.name)
-        await newGuild.create_sticker(name=sticker.name, image=await sticker.read())
-        await asyncio.sleep(.5)
+    try:
+        max_emojis = newGuild.emoji_limit
+        available_slots = max_emojis - len(newGuild.emojis)
+        if available_slots <= 0:
+            print(f"{Fore.LIGHTRED_EX}[Sticker Cloning]{Fore.RESET} Cannot Create More Stickers.")
+            return
+
+        emojis_to_clone = min(available_slots, len(oldGuild.emojis))
+        for emoji in oldGuild.emojis[:emojis_to_clone]:
+            print(f"{Fore.LIGHTBLUE_EX}[Sticker Cloning]{Fore.RESET} Creating Emoji: {str(emoji.id)} | {emoji.name}")
+            await newGuild.create_custom_emoji(name=emoji.name, image=await emoji.read())
+            print(f"{Fore.LIGHTBLUE_EX}[Sticker Cloning]{Fore.RESET} Created Emoji:")
+            await asyncio.sleep(.65)
+    except discord.RateLimited as e:
+        print(f"{Fore.RED}[Error]{Fore.RESET} {e}")
+        return
 
 
 
@@ -438,7 +509,7 @@ async def clone(ctx: commands.Context, OldID: int, newGuildID: int):
     msg = await ctx.send("Cloning Started!")
     await msg.edit(content="Preparing Server...")
     await prepareServer(newGuild)
-    await msg.edit(content="Cloning Icon...")
+    await msg.edit(content="Info Cloning...")
     await cloneInfo(oldGuild, newGuild)
     await msg.edit(content="Cloning Roles...")
     await clone_roles(oldGuild, newGuild)
@@ -452,4 +523,4 @@ async def clone(ctx: commands.Context, OldID: int, newGuildID: int):
     await cloneStickers(oldGuild, newGuild)
     await msg.edit(content=f"Server Cloned! It Took {round((time.time() - start_time), 2)} Seconds.")
 
-bot.run(token, log_handler=None)
+bot.run(token)
