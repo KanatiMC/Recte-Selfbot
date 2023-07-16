@@ -205,7 +205,7 @@ async def base64decode(ctx, *, str):
 
 
 @bot.command()
-async def channelinfo(ctx, channel: discord.TextChannel = None):
+async def channelinfo(ctx, channel: discord.Optional[discord.TextChannel]):
     if channel is None:
         channel = ctx.message.channel
     info = f"Channel Information\n\n" \
@@ -234,7 +234,7 @@ async def roleinfo(ctx, role: discord.Role):
 
 
 @bot.command()
-async def ascii(ctx, font=None, *, text=None):
+async def ascii(ctx, font: discord.Optional[str], *, text=None):
     if text is None:
         await ctx.send(f'Error, Must Have A Text Argument.')
         return
@@ -246,13 +246,13 @@ async def ascii(ctx, font=None, *, text=None):
     await ctx.send(f"```{msg}```"
                    "Check Out More Fonts At http://kanati.bio/fonttypes.txt")
 
-
+#Taken From https://github.com/KxleLmao/DiscordSelfbot
 @bot.command()
 async def nitro(ctx):
     await ctx.reply(
         f'Here Is You Generated Nitro Code: \nhttps://discord.gift/{"".join(random.choices(string.ascii_letters + string.digits, k=16))}')
 
-
+#Taken From https://github.com/KxleLmao/DiscordSelfbot
 @bot.command()
 async def hide(ctx, displayText=None, hiddenText=None):
     await ctx.message.delete()
@@ -282,7 +282,7 @@ m_offets = [
     (1, 1)
 ]
 
-
+#Taken From https://github.com/KxleLmao/DiscordSelfbot
 @bot.command()
 async def minesweeper(ctx, size: int = 5):
     await ctx.message.delete()
@@ -307,7 +307,7 @@ async def minesweeper(ctx, size: int = 5):
         message += "\n"
     await ctx.send(message)
 
-
+#Taken From https://github.com/KxleLmao/DiscordSelfbot
 @bot.command(name="1337")
 async def _1337(ctx, *, text=None):
     await ctx.message.delete()
