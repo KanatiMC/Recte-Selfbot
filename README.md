@@ -12,7 +12,7 @@ My Attempt At Making The Best Free Discord Selfbot.
 Clone A Server With Just It's ID Into A New One. It Saves Roles, Emojis, Stickers, The Image, Banner, And Even Permissions.
 
 **ASCII Art Command**
-Uses Python's (Art)[https://pypi.org/project/art/] Library To Generate ASCII Art.
+Uses Python's [Art](https://pypi.org/project/art/) Library To Generate ASCII Art.
 
 **Status Command**
 Sets The User's Status To Something Custom.
