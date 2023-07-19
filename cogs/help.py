@@ -32,7 +32,17 @@ class Help(commands.Cog):
     async def admin(self, ctx):
         await ctx.reply("```Admin Help Menu"
                         f"\n\n{self.prefix}clone <guild1 ID> <guild2 ID>"
-                        "Clones The Guild1 Server To Guild2```")
+                        "Clones The Guild1 Server To Guild2"
+                        f"\n\n{self.prefix}lock <channel2Lock>(Optional)"
+                        "Locks A Channel, Preventing People To Talk In It"
+                        f"\n\n{self.prefix}lock <channel2Unlock>(Optional)"
+                        "Unlocks A Channel, Allowing People To Talk In It"
+                        f"\n\n{self.prefix}hide <channel2Hide>(Optional)"
+                        "Hides A Channel, Preventing Most People From Seeing It"
+                        f"\n\n{self.prefix}unhide <channel2Unhide>(Optional)"
+                        "Unhides A Channel, Allowing People To See It"
+                        f"\n\n{self.prefix}purge <messageCount>"
+                        "Deletes A Chosen Amount Of Messages```")
 
     @help.command(aliases=['games'])
     async def game(self, ctx):
@@ -69,10 +79,16 @@ class Help(commands.Cog):
                         "\nSends ASCII Art Of The Chosen Text With The Chosen Font"
                         f"\n\n{self.prefix}nitro"
                         "\nGenerates A Fake Nitro, With The Possibility Of Being Real"
-                        f"\n\n{self.prefix}hide <displayText> <hiddenText>"
+                        f"\n\n{self.prefix}hidetext <displayText> <hiddenText>"
                         "\nSends A Message With <hiddenText> Being Hidden, But <displayText> Being Visible"
                         f"\n\n{self.prefix}1337 <text>"
-                        "\nSends A Message With Super Hacker Text```")
+                        "\nSends A Message With Super Hacker Text"
+                        f"\n\n{self.prefix}owoify <message>"
+                        "\nOwO-ifys A Message"
+                        f"\n\n{self.prefix}iplookup <ip>"
+                        "\nGives Infromation Based Off Of An IP Address"
+                        f"\n\n{self.prefix}translate <ToLanguage> <FromLanguge> <Text>"
+                        "\nTranslates The Text From A Language To Another```")
 
 
 

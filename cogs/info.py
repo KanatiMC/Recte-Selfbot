@@ -7,8 +7,6 @@ class Info(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-
-
     @commands.command(name="channelinfo")
     async def cinfo(self, ctx, channel: discord.Optional[discord.TextChannel]):
         if channel is None:

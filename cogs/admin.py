@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from colorama import Fore
+from colorama import Fore, Style
 import asyncio
 import time
 
@@ -8,6 +8,12 @@ import time
 class Admin(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    def logInfo(self, log: str):
+        return f"{Fore.LIGHTBLUE_EX}{Style.DIM}{log}{Fore.RESET}{Style.RESET_ALL}"
+
+    def logError(self, log: str):
+        return f"{Fore.LIGHTRED_EX}{Style.DIM}{log}{Fore.RESET}{Style.RESET_ALL}"
 
     mappings = {"roles": {}, "categories": {}, "webhooks": {}, "channels": {}, "messages": {}}
 
@@ -200,6 +206,62 @@ class Admin(commands.Cog):
         await self.cloneEmojis(oldGuild, newGuild)
         await msg.edit(content=f"Server Cloned! It Took {round((time.time() - start_time), 2)} Seconds.")
         print(f"{Fore.LIGHTBLUE_EX}[Log]{Fore.RESET} Server Cloning Complete")
+
+    @commands.command()
+    @commands.has_permissions(manage_channels=True)
+    async def hide(self, ctx, channel: discord.Optional[discord.TextChannel]):
+        if channel is None:
+            channel = ctx.message.channel
+        overwrite = channel.overwrites_for(ctx.guild.default_role)
+        overwrite.view_channel = False
+        await channel.set_permissions(ctx.guild.default_role, overwrite=overwrite)
+        await ctx.reply(f"Channel: {channel.name} Is Now Visible")
+
+    @commands.command()
+    @commands.has_permissions(manage_channels=True)
+    async def unhide(self, ctx, channel: discord.Optional[discord.TextChannel]):
+        if channel is None:
+            channel = ctx.message.channel
+        overwrite = channel.overwrites_for(ctx.guild.default_role)
+        overwrite.view_channel = True
+        await channel.set_permissions(ctx.guild.default_role, overwrite=overwrite)
+        await ctx.reply(f"Channel: {channel.name} Is Now Visible")
+
+    @commands.command()
+    @commands.has_permissions(manage_channels=True)
+    async def lock(self, ctx, channel: discord.Optional[discord.TextChannel]):
+        if channel is None:
+            channel = ctx.message.channel
+        overwrite = channel.overwrites_for(ctx.guild.default_role)
+        overwrite.send_messages = False
+        await channel.set_permissions(ctx.guild.default_role, overwrite=overwrite)
+        await ctx.send('Channel locked.')
+
+    @commands.command()
+    @commands.has_permissions(manage_channels=True)
+    async def unlock(self, ctx, channel: discord.Optional[discord.TextChannel]):
+        if channel is None:
+            channel = ctx.message.channel
+        overwrite = channel.overwrites_for(ctx.guild.default_role)
+        overwrite.send_messages = True
+        await channel.set_permissions(ctx.guild.default_role, overwrite=overwrite)
+        await ctx.send('Channel Unlocked.')
+
+    @commands.command(aliases=["clear", "prg", "clr"])
+    @commands.has_permissions(manage_messages=True)
+    async def purge(self, ctx, amount=30):
+        if ctx.message.author.guild_permissions.manage_messages:
+            channel = ctx.message.channel
+            messages = []
+            async for message in channel.history(limit=amount + 1):
+                messages.append(message)
+            await channel.delete_messages(messages)
+            await ctx.send(
+                f'{ctx.message.author.mention} Has Purged {amount} Messages')
+            print(f"{self.logInfo('[Logging]:')} {ctx.author} Has Just Purged {amount} Message(s)")
+        else:
+            await ctx.send(
+                "You're Missing The Correct Permissions For This Command.")
 
 
 async def setup(bot):

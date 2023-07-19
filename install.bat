@@ -7,5 +7,4 @@ if errorlevel 1 goto errorNoPip
 python -m pip install -r requirements.txt
 cls
 Title Downloading Modules
-echo python main.py >> run.bat
 start run.bat
