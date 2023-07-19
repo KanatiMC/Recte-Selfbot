@@ -11,6 +11,6 @@ My Attempt At Making The Best Free Discord Selfbot.
 
 ## Credits
 ___
-[Install.bat](https://github.com/TT-Tutorials/GANG-Nuker/tree/main) From GANG Nuker
+Install.bat From [GANG Nuker](https://github.com/TT-Tutorials/GANG-Nuker/tree/main)
 
 Some Commands From [AstraaDev](https://github.com/AstraaDev/Discord-SelfBot)
