@@ -1,5 +1,5 @@
 # Recte-Selfbot
-My Attempt At Making The Best Free Discord Selfbot.
+A Basic Selfbot I Made, I Stopped Developing Because I Got Bored.
 
 
 # Installation
